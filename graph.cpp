@@ -107,7 +107,6 @@ void Graph::maximumMatching(){
 list<list<int>> Graph::findMultipleAugmentingPath(){
     vector<bool> visited(V, false);
     vector<int>  depth(V, 0);
-    vector<int>  parent(V, -1);
     list<int>    free_leafs;
     queue<int> q;
     // get free vertices from M group
@@ -131,16 +130,13 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
             if(matched[v] == -1){  // M --> N step with a free node 'v', found an augmenting path
                 cutoff_depth = depth[u]+1;
                 depth[v]  = depth[u]+1;
-                parent[v] = u;
                 free_leafs.emplace_back(v);
             }
             else if(matched[v] != u){  // M --> N step with 'v' already matched but not 'u'
-                parent[v] = u;
                 depth[v]  = depth[u]+1;
                 // only one option, go back N --> M using matched edge
                 int n = v;
                 int m = matched[n];
-                parent[m] = n;
                 depth[m]  = depth[n]+1;
                 q.push(m);
             }
@@ -148,7 +144,7 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
     }
 
     list<list<int>> disjoint_paths;
-    generateDisjointPaths(parent, free_leafs, disjoint_paths);
+    generateDisjointPaths(depth, free_leafs, disjoint_paths);
     cout << "disjoint paths are: " << endl;
     for (const auto &path : disjoint_paths) {
         for (int node : path) {
@@ -159,22 +155,57 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
     return disjoint_paths;
 }
 
-void Graph::generateDisjointPaths(vector<int>& parent, list<int>& free_leafs, list<list<int>>& disjoint_paths){
-    vector<int> deactivated(V, false);
-    for(int leaf:free_leafs){
+
+void Graph::generateDisjointPaths(vector<int>& depth, list<int>& free_leafs, list<list<int>>& disjoint_paths){
+    vector<bool> active(V, true);
+    //for(int leaf:free_leafs){
+    for(int n=V/2; n < V;n++){
+        if(matched[n]!= -1 & depth[n]>0) continue;
+        int leaf = n;
         list<int> path;
-        int n = leaf;
-        while (n != -1 && !deactivated[n]) {
-            path.emplace_front(n);
-            deactivated[n] = true;
-            n = parent[n];
-        }
+        bool found_path = false;
+        cout<< "Search for disjoint path starting with " << leaf << endl;
+        extractPath(leaf, path, depth, active, found_path);
         // path should contain a free variable from N (leaf) and a free variable from M
-        if (!path.empty() && path.front() != path.back() && 
-            matched[path.front()] == -1 && matched[path.back()] == -1) {
+        if (found_path) {
             disjoint_paths.emplace_back(path);
         }
     }
+}
+
+void Graph::extractPath(int u, list<int>& path, vector<int>& depth, vector<bool>& active, bool& found_path) {
+    if(!active[u]){
+        return;
+    }
+    else if(found_path){
+        active[u] = false;
+        path.emplace_back(u);
+        cout << "\t" << u << endl;
+        return;
+    }
+    else if(matched[u]==-1 && u < V/2){ //found a free variable from M
+        found_path= true;
+        active[u] = false;
+        path.emplace_back(u);
+        cout << "found path!" << endl;
+        cout << "\t" << u << endl;
+        return;
+    }
+
+    for(int v:adj_lst[u]){
+        //only adjacent nodes with lower depth: '>' operation is sufficient, otherwise wouldn't be shortest path by triangle inequality
+        if(depth[u] > depth[v]){ 
+            extractPath(v, path, depth, active, found_path);
+            if(found_path){
+                active[u]=false;
+                path.emplace_back(u);
+                cout << "\t" << u << endl;
+                return;
+            }
+        }
+    }
+
+    active[u]=false;
 }
 
 void Graph::readMatchings(){

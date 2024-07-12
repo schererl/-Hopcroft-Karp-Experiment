@@ -23,6 +23,7 @@ public:
     void generateDisjointPaths(vector<int>& parent, list<int>& free_leafs, list<list<int>>& disjoint_paths);
     void extractPath(int u, list<int> &path, vector<int> &depth, vector<bool> &active, bool &found_path);
     void maximumMatching();
+    void symmetricDifference(list<int> path);
     void readMatchings();
     ~Graph();
 };

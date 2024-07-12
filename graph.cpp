@@ -81,27 +81,31 @@ void Graph::maximumMatching(){
     while(true){
         list<int> aug_path = findAugmentingPath();
         if(aug_path.size() == 0) break;
-
-        //update matchings
-        while(!aug_path.empty()){
-            int u = aug_path.front();
-            aug_path.pop_front();
-            int v = aug_path.front();
-            aug_path.pop_front();
-            if(matched[u]){
-                matched[matched[u]] = -1;
-                matched[u] = -1;
-            }
-            if(matched[v]){
-                matched[matched[v]] = -1;
-                matched[v] = -1;
-            }
-            matched[u] = v;
-            matched[v] = u;
-        }
-
+        symmetricDifference(aug_path);
+        
         readMatchings();
     }
+}
+
+void Graph::symmetricDifference(list<int> aug_path){
+    //update matchings
+    while(!aug_path.empty()){
+        int u = aug_path.front();
+        aug_path.pop_front();
+        int v = aug_path.front();
+        aug_path.pop_front();
+        if(matched[u]){
+            matched[matched[u]] = -1;
+            matched[u] = -1;
+        }
+        if(matched[v]){
+            matched[matched[v]] = -1;
+            matched[v] = -1;
+        }
+        matched[u] = v;
+        matched[v] = u;
+    }
+
 }
 
 list<list<int>> Graph::findMultipleAugmentingPath(){

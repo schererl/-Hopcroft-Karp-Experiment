@@ -11,7 +11,7 @@ int main() {
     std::istringstream first_line(line);
     char p, edge[5];
     first_line >> p >> edge >> n1 >> n2 >> num_edges;
-    std::cout << n1 << " " << n2 << std::endl;
+    //std::cout << n1 << " " << n2 << std::endl;
     Graph *g = new Graph(n1 + n2);
 
     while (std::getline(std::cin, line)) {
@@ -20,14 +20,10 @@ int main() {
         int u, v;
         edge_line >> e >> u >> v;
         g->addEdge(u, v);
-        std::cout << "edge added> " << u << " " << v << std::endl;
+        //std::cout << "edge added> " << u << " " << v << std::endl;
     }
 
-    auto maximal_augpaths = g->findMultipleAugmentingPath();
-    for(auto aug_path: maximal_augpaths){
-        g->symmetricDifference(aug_path);
-    }
-    g -> readMatchings();
-    
+    g->maximumMatching();
+
     return 0;
 }

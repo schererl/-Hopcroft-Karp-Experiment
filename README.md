@@ -3,10 +3,7 @@ Assignment on Matching Problem - Advanced Algorithms Course (UFRGS)
 
 Original Link: https://www.inf.ufrgs.br/~mrpritt/doku.php?id=inf05016:2024-1-trabalhos
 
-# Execution
-```
-  g++ graph.cpp main.cpp -o max_matching; ./graph_generator 5 5 0.3 6 | ./max_matching    
-```
+
 # Requirements
 
 For generating the bipartite graph we need:
@@ -26,6 +23,13 @@ use instead:
   uniform_int_distribution<> p1(0, n1 - 1);
   uniform_int_distribution<> p2(n1, 2*n2-1);
 ```
+
+# Execution
+```
+  g++ Emparelhamento_Maximo/src/rand_bipartite.cpp -o graph_generator;
+  g++ graph.cpp main.cpp -o max_matching; ./graph_generator 5 5 0.3 6 | ./max_matching    
+```
+
 # Goals
 
   * Implement the Hopcroft-Karp algorithm that solves the maximum matching problem in bipartite graphs.

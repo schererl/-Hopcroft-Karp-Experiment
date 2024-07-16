@@ -77,15 +77,49 @@ list<int> Graph::findAugmentingPath(){
 }
 
 void Graph::maximumMatching(){
-    list<int> aug_path;
-    while(true){
-        list<int> aug_path = findAugmentingPath();
-        if(aug_path.size() == 0) break;
-        symmetricDifference(aug_path);
+    // list<int> aug_path;
+    // while(true){
+    //     list<int> aug_path = findAugmentingPath();
+    //     if(aug_path.size() == 0) break;
+    //     symmetricDifference(aug_path);
         
-        readMatchings();
+    //     readMatchings();
+    // }
+    auto start_global = std::chrono::high_resolution_clock::now();
+    int it = 0;
+    while(true){
+        auto start = std::chrono::high_resolution_clock::now();
+        auto maximal_augpaths = findMultipleAugmentingPath();
+        if(maximal_augpaths.size() == 0) break;
+        for(auto aug_path: maximal_augpaths){
+            symmetricDifference(aug_path);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = end - start;
+        int match_count = 0;
+        for(int n=0; n < V/2; n++){
+            if(matched[n]!=-1){
+                match_count+=1;
+            }
+        }
+        cout << "iteration " << it << " ended after " << elapsed.count() << " seconds with " << match_count << " matchings." << endl;
+        it++;
+        //readMatchings();
     }
+    auto end_global = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end_global - start_global;
+    int match_count = 0;
+    for(int n=0; n < V/2; n++){
+        if(matched[n]!=-1){
+            match_count+=1;
+        }
+    }
+    cout << "Algorithm ended after " << it << " iterations, " << elapsed.count() << " seconds with " << match_count << " matchings." << endl;
+    
+
 }
+
+
 
 void Graph::symmetricDifference(list<int> aug_path){
     //update matchings
@@ -148,27 +182,18 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
     }
 
     list<list<int>> disjoint_paths;
-    generateDisjointPaths(depth, free_leafs, disjoint_paths);
-    cout << "disjoint paths are: " << endl;
-    for (const auto &path : disjoint_paths) {
-        for (int node : path) {
-            cout << node << " ";
-        }
-        cout << endl;
-    }
+    generateDisjointPaths(depth, disjoint_paths);
     return disjoint_paths;
 }
 
 
-void Graph::generateDisjointPaths(vector<int>& depth, list<int>& free_leafs, list<list<int>>& disjoint_paths){
+void Graph::generateDisjointPaths(vector<int>& depth, list<list<int>>& disjoint_paths){
     vector<bool> active(V, true);
-    //for(int leaf:free_leafs){
     for(int n=V/2; n < V;n++){
         if(matched[n]!= -1 & depth[n]>0) continue;
         int leaf = n;
         list<int> path;
         bool found_path = false;
-        cout<< "Search for disjoint path starting with " << leaf << endl;
         extractPath(leaf, path, depth, active, found_path);
         // path should contain a free variable from N (leaf) and a free variable from M
         if (found_path) {
@@ -184,15 +209,12 @@ void Graph::extractPath(int u, list<int>& path, vector<int>& depth, vector<bool>
     else if(found_path){
         active[u] = false;
         path.emplace_back(u);
-        cout << "\t" << u << endl;
         return;
     }
     else if(matched[u]==-1 && u < V/2){ //found a free variable from M
         found_path= true;
         active[u] = false;
         path.emplace_back(u);
-        cout << "found path!" << endl;
-        cout << "\t" << u << endl;
         return;
     }
 
@@ -203,7 +225,6 @@ void Graph::extractPath(int u, list<int>& path, vector<int>& depth, vector<bool>
             if(found_path){
                 active[u]=false;
                 path.emplace_back(u);
-                cout << "\t" << u << endl;
                 return;
             }
         }

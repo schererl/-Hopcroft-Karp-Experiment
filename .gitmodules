@@ -1,3 +1,6 @@
 [submodule "Emparelhamento_Maximo"]
 	path = Emparelhamento_Maximo
 	url = https://github.com/mrpritt/Emparelhamento_Maximo/
+[submodule "flow-matching-reduction"]
+	path = flow-matching-reduction
+	url = https://github.com/schererl/EK-MaxFlowExperiment.git

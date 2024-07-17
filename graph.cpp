@@ -10,7 +10,7 @@
 #include <fstream>
 
 
-Graph::Graph(int V):V(V), M(0), adj_lst(V), matched(V,-1) {
+Graph::Graph(int V):V(V), M(0), adj_lst(V), matched(V,-1), bfs_calls(0), dfs_calls(0), bfs_operations(0), dfs_operations(0), aug_paths(0), max_aug_path(0), sum_aug_paths(0) {
 
 }
 
@@ -20,79 +20,21 @@ void Graph::addEdge(int u, int v){
     adj_lst[v].push_back(u);
 }
 
-list<int> Graph::findAugmentingPath(){
-    cout << "search for augmenting path." << endl;
-    vector<bool> visited(V, false);
-    vector<int> parent(V, -1);
-    queue<int> q;
-    // get free vertices from M group
-    for(int n = 0; n < V/2;n++){
-        if(matched[n] == -1){
-            visited[n]=true;
-            q.push(n);
-        }
-    }
-
-    int iterations = 0;
-    list<int> aug_path;
-
-    while(!q.empty()){
-        iterations+=1;
-        int u = q.front();
-        q.pop();
-        visited[u] = true;
-        cout << "\nnode " << u << endl;
-        for(int v : adj_lst[u]){
-            if(visited[v]) continue;
-            cout << "--> node " << v << endl;
-            if(matched[v] == -1){  // M --> N step with a free node 'v', found an augmenting path
-                cout << "\tfree" << endl;
-                int n = v;
-                parent[v] = u;
-                while(n != -1){
-                    aug_path.emplace_back(n);
-                    n = parent[n];
-                }
-                cout << "augmenting path of size " << aug_path.size() << " found after " << iterations << " iterations." << endl;
-                cout << "path: ";
-                for (int element : aug_path) {
-                    cout << element << " ";
-                }
-                cout << endl;
-                return aug_path;
-            }
-            else if(matched[v] != u){  // M --> N step with 'v' already matched but not 'u'
-                cout << "\talready matched with node " << matched[v] << endl;
-                parent[v] = u;
-                // only one option, go back N --> M using matched edge
-                int n = v;
-                int m = matched[n];
-                parent[m] = n;
-                q.push(m);
-            }
-        }
-    }
-    cout << "augmenting path not found." << endl;    
-    return aug_path;    
-}
-
 void Graph::maximumMatching(){
-    // list<int> aug_path;
-    // while(true){
-    //     list<int> aug_path = findAugmentingPath();
-    //     if(aug_path.size() == 0) break;
-    //     symmetricDifference(aug_path);
-        
-    //     readMatchings();
-    // }
     auto start_global = std::chrono::high_resolution_clock::now();
     int it = 0;
     while(true){
         auto start = std::chrono::high_resolution_clock::now();
+        aug_paths+=1;
         auto maximal_augpaths = findMultipleAugmentingPath();
+        
         if(maximal_augpaths.size() == 0) break;
+        sum_aug_paths += maximal_augpaths.size();
         for(auto aug_path: maximal_augpaths){
             symmetricDifference(aug_path);
+            if(max_aug_path < aug_path.size()){
+                max_aug_path = aug_path.size();
+            }
         }
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
@@ -104,7 +46,6 @@ void Graph::maximumMatching(){
         }
         cout << "iteration " << it << " ended after " << elapsed.count() << " seconds with " << match_count << " matchings." << endl;
         it++;
-        //readMatchings();
     }
     auto end_global = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end_global - start_global;
@@ -114,9 +55,15 @@ void Graph::maximumMatching(){
             match_count+=1;
         }
     }
-    cout << "Algorithm ended after " << it << " iterations, " << elapsed.count() << " seconds with " << match_count << " matchings." << endl;
-    
-
+    cout << "Algorithm ended after: " << it << " iterations. " << endl;
+    cout << "Elapsed time: " <<  elapsed.count() << " seconds. " << endl; 
+    cout << "Total matchings: " << match_count << " matchings." << endl;
+    cout << "Total augmenting paths: " << sum_aug_paths << endl;
+    cout << "Maximum size augmenting path: " << max_aug_path << endl;
+    cout << "BFS calls: " << bfs_calls << endl;
+    cout << "BFS operations: " << bfs_operations << endl;
+    cout << "DFS calls: " << dfs_calls << endl;
+    cout << "DFS operations: " << dfs_operations << endl;
 }
 
 
@@ -156,6 +103,7 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
     }
 
     int cutoff_depth = V;
+    bfs_calls += 1;
     while(!q.empty()){
         int u = q.front();
         q.pop();
@@ -164,6 +112,7 @@ list<list<int>> Graph::findMultipleAugmentingPath(){
             continue;
 
         for(int v : adj_lst[u]){
+            bfs_operations+=1;
             if(visited[v]) continue;
             if(matched[v] == -1){  // M --> N step with a free node 'v', found an augmenting path
                 cutoff_depth = depth[u]+1;
@@ -194,7 +143,10 @@ void Graph::generateDisjointPaths(vector<int>& depth, list<list<int>>& disjoint_
         int leaf = n;
         list<int> path;
         bool found_path = false;
+        
+        dfs_calls+=1;
         extractPath(leaf, path, depth, active, found_path);
+        
         // path should contain a free variable from N (leaf) and a free variable from M
         if (found_path) {
             disjoint_paths.emplace_back(path);
@@ -203,6 +155,7 @@ void Graph::generateDisjointPaths(vector<int>& depth, list<list<int>>& disjoint_
 }
 
 void Graph::extractPath(int u, list<int>& path, vector<int>& depth, vector<bool>& active, bool& found_path) {
+    dfs_operations+=1;
     if(!active[u]){
         return;
     }

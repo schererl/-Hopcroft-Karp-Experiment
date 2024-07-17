@@ -1,0 +1,19 @@
+#!/bin/bash
+g++ graph.cpp main.cpp -o max_matching
+
+N1=15
+N2=15
+seeds=(1 100 1000)
+densities=(0.001 0.002 0.004 0.008 0.016 0.032 0.064 0.128)
+
+for seed in "${seeds[@]}"; do
+  for density in "${densities[@]}"; do
+    echo "@"
+    echo "@"
+    echo "Running with seed=$seed"
+    echo "Density: $density"
+    ulimit -t 60
+    ulimit -v 2000000
+    ./graph_generator $N1 $N2 $density $seed | ./max_matching
+  done
+done

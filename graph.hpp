@@ -14,7 +14,14 @@ private:
     int V;    
     // experimental stuff
     chrono::duration<double> elapsed_time;
-    
+    int bfs_calls;
+    int dfs_calls;
+    int bfs_operations;
+    int dfs_operations;
+    int aug_paths;
+    int max_aug_path;
+    int sum_aug_paths;
+
 public:
     Graph(int V);
     void addEdge(int u, int v);

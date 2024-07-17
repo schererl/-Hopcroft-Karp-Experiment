@@ -4,6 +4,12 @@ Assignment on Matching Problem - Advanced Algorithms Course (UFRGS)
 Original Link: https://www.inf.ufrgs.br/~mrpritt/doku.php?id=inf05016:2024-1-trabalhos
 
 
+# TODO
+
+**problem here:** ./graph_generator 11 11 0.128 1000
+
+* edmonds-karp leads to 7 matchings and hopcroft-karp to 8, which one is right?
+
 # Requirements
 
 For generating the bipartite graph we need:
@@ -13,6 +19,11 @@ sudo apt install libfmt-dev
 
 Assume we have V vertices and the vertices indexed [0,n-1] are in M group and [n,2n-1] are in N group.
 This requires a change into the [submodule](https://github.com/mrpritt/Emparelhamento_Maximo/):
+
+
+We also use submodule git submodule https://github.com/schererl/EK-MaxFlowExperiment specifically with branch flow-matching-reduction.
+
+Update the submodule with the branch mentioned to run it and compare with Hopcroft-karp execution.
 
 ```
   uniform_int_distribution<> p1(0, n1 - 1);
@@ -30,11 +41,15 @@ use instead:
   g++ graph.cpp main.cpp -o max_matching; ./graph_generator 5 5 0.3 6 | ./max_matching    
 ```
 
+
+
+
+
 # Goals
 
   * Implement the Hopcroft-Karp algorithm that solves the maximum matching problem in bipartite graphs.
   * Document the implementation, particularly the data structures for representing the problem.
-  * Conduct tests that demonstrate the algorithm's complexity is \(O(\sqrt{n}(n+m))\). Specifically: complexities \(O(\sqrt{n})\) for the number of phases and \(O(n+m)\) for extracting a maximal set of augmenting paths.
+  * Conduct tests that demonstrate the algorithm's complexity is $O(\sqrt{n}(n+m))$. Specifically: complexities $O(\sqrt{n})$ for the number of phases and $O(n+m)$ for extracting a maximal set of augmenting paths.
   * Decide experimentally: is the reduction approach to a flow problem more efficient?
   * Scalability test: find the "bottleneck matching" in selected large graphs (TBD).
 

@@ -1,4 +1,6 @@
 run
 graph_generator
 max_matching
+bip_flow
 .vscode/settings.json
+results/*

@@ -4,11 +4,17 @@ Assignment on Matching Problem - Advanced Algorithms Course (UFRGS)
 Original Link: https://www.inf.ufrgs.br/~mrpritt/doku.php?id=inf05016:2024-1-trabalhos
 
 
-# TODO
+# LAST-UPDATES
 
-**problem here:** ./graph_generator 11 11 0.128 1000 (SOLVED)
-**another here:** ./graph_generator 20 20 0.128 1000 HK finds 17 matching and EK finds 18 matchings. (SOLVED)
-**serveral issues found**: I think I solved the problem, Hungarian Tree did not receive the necessary attention.
+- changed BFS and DFS, it became simpler and seems more efficient.
+
+- **augmenting pth not augmenting**: More problems.. (SOLVED)
+
+- **serveral issues found**: I think I solved the problem, Hungarian Tree did not receive the necessary attention.
+
+- **another here:** ./graph_generator 20 20 0.128 1000 HK finds 17 matching and EK finds 18 matchings. (SOLVED)
+
+- **problem here:** ./graph_generator 11 11 0.128 1000 (SOLVED)
 
 
 # Requirements

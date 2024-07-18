@@ -11,7 +11,8 @@ private:
     vector<list<int>> adj_lst;
     vector<int> matched;
     int M;
-    int V;    
+    int V;
+    
     // experimental stuff
     chrono::duration<double> elapsed_time;
     int bfs_calls;
@@ -26,11 +27,10 @@ public:
     Graph(int V);
     void addEdge(int u, int v);
     list<int> findAugmentingPath();
-    list<list<int>> findMultipleAugmentingPath();
-    void generateDisjointPaths(vector<int>& parent, list<list<int>>& disjoint_paths);
-    void extractPath(int u, list<int> &path, vector<int> &depth, vector<bool> &active, bool &found_path);
+    bool findMultipleAugmentingPath();
+    bool extractPath(int v, vector<int> &depth, vector<bool> &active);
     void maximumMatching();
-    void symmetricDifference(list<int> path);
+    int countMatchings();
     void readMatchings();
     void readAugpath(list<int> path);
     ~Graph();

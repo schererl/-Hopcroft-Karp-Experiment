@@ -6,9 +6,10 @@ Original Link: https://www.inf.ufrgs.br/~mrpritt/doku.php?id=inf05016:2024-1-tra
 
 # TODO
 
-**problem here:** ./graph_generator 11 11 0.128 1000
+**problem here:** ./graph_generator 11 11 0.128 1000 (SOLVED)
+**another here:** ./graph_generator 20 20 0.128 1000 HK finds 17 matching and EK finds 18 matchings. (SOLVED)
+**serveral issues found**: I think I solved the problem, Hungarian Tree did not receive the necessary attention.
 
-* edmonds-karp leads to 7 matchings and hopcroft-karp to 8, which one is right?
 
 # Requirements
 

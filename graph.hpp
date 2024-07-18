@@ -32,6 +32,7 @@ public:
     void maximumMatching();
     void symmetricDifference(list<int> path);
     void readMatchings();
+    void readAugpath(list<int> path);
     ~Graph();
 };
 

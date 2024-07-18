@@ -24,6 +24,5 @@ int main() {
     }
 
     g->maximumMatching();
-
     return 0;
 }

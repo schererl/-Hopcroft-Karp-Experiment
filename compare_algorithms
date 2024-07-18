@@ -1,16 +1,15 @@
-
 #!/bin/bash
 
 g++ flow-matching-reduction/graph.cpp flow-matching-reduction/main.cpp -o ./bip_flow
 g++ graph.cpp main.cpp -o max_matching
 
-N1=11
-N2=11
+N1=1000
+N2=1000
 seeds=(1 100 1000)
 densities=(0.001 0.002 0.004 0.008 0.016 0.032 0.064 0.128)
 
-for seed in "${seeds[@]}"; do
-  for density in "${densities[@]}"; do
+for density in "${densities[@]}"; do
+  for seed in "${seeds[@]}"; do
     echo "@"
     echo "@"
     echo "@"

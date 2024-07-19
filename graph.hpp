@@ -28,7 +28,7 @@ public:
     void addEdge(int u, int v);
     list<int> findAugmentingPath();
     bool findMultipleAugmentingPath();
-    bool extractPath(int v, vector<int> &depth, vector<bool> &active);
+    bool extractPath(int v, vector<int> &depth, vector<bool> &active, int &path_len);
     void maximumMatching();
     int countMatchings();
     void readMatchings();

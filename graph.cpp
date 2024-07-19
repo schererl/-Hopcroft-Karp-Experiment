@@ -66,7 +66,7 @@ int Graph::countMatchings(){
 }
 
 bool Graph::findMultipleAugmentingPath(){
-    // my original code had some flaw I couldn't fix, I get some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
+    // my original code had some flaw I couldn't fix, I got some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
     vector<int>  dist(V+1, 10000000);
     queue<int>   q;
     for(int n = 0; n < V/2;n++){
@@ -80,14 +80,12 @@ bool Graph::findMultipleAugmentingPath(){
     while(!q.empty()){
         int u = q.front();
         q.pop();
-        //cout << u << endl;
         if(dist[u] == dist[V] || dist[u] > cutt_off){ 
             continue;
         }
         
         for(int v : adj_lst[u]){
             if(dist[v] == dist[V]){ // in case matched[v] not visited yet
-                //cout << '\t' << v << " reached" << endl;
                 dist[v] = dist[u]+1;
                 if(matched[v]==-1){ // found free v, assign the cuttoff
                     cutt_off = dist[v];
@@ -100,14 +98,19 @@ bool Graph::findMultipleAugmentingPath(){
     }
 
     vector<bool> active(V, true);
-    //cout << "free vertices from N: ";
     bool found_path = false;
     for(int n=V/2; n < V;n++){
         if(matched[n]!= -1 || dist[n]==-1) continue;
-        //cout << n << " d(" << dist[n] << ") \n";
         int leaf = n;
         dfs_calls+=1;
-        found_path |= extractPath(leaf, dist, active);
+        int path_len = 0;
+        found_path |= extractPath(leaf, dist, active, path_len);
+        if(path_len > 0){
+            sum_aug_paths+=1;
+            if(path_len > max_aug_path){
+                max_aug_path=path_len;
+            }
+        }
         
     }
     return found_path;
@@ -115,8 +118,8 @@ bool Graph::findMultipleAugmentingPath(){
 
 
 
-bool Graph::extractPath(int n, vector<int>& depth, vector<bool>& active) {
-    // my original code had some flaw I couldn't fix, I get some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
+bool Graph::extractPath(int n, vector<int>& depth, vector<bool>& active, int& path_len) {
+    // my original code had some flaw I couldn't fix, I got some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
     dfs_operations+=1;
     active[n] = false;
     
@@ -127,14 +130,16 @@ bool Graph::extractPath(int n, vector<int>& depth, vector<bool>& active) {
             active[m] = false;
             matched[m] = n;
             matched[n] = m;
+            path_len+=2;
             return true;
         }
         // check for active u
         if(active[m] && depth[n]-1 == depth[m]){
             active[m] = false;
-            if(extractPath(matched[m], depth, active)){
+            if(extractPath(matched[m], depth, active, path_len)){
                 matched[m] = n;
                 matched[n] = m;
+                path_len+=2;
                 return true;
             }
         }
@@ -149,12 +154,6 @@ void Graph::readMatchings(){
             cout << "("<< matched[matched[n]] <<","<< matched[n] <<")";
         }
     }
-
-    // for(int n=0; n < V/2; n++){
-    //     if(matched[n]!=-1){
-    //         cout << "("<< matched[matched[n]] <<","<< matched[n] <<")";
-    //     }
-    // }
     cout << endl;
 }
 

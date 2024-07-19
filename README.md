@@ -6,6 +6,8 @@ Original Link: https://www.inf.ufrgs.br/~mrpritt/doku.php?id=inf05016:2024-1-tra
 
 # LAST-UPDATES
 
+- Implementing BN decomposition: decomposition is not finding perfect matching in the binary search so it is not converging.
+
 - changed BFS and DFS, it became simpler and seems more efficient.
 
 - **augmenting pth not augmenting**: More problems.. (SOLVED)

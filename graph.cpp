@@ -1,14 +1,13 @@
 #include "graph.hpp"
-#include <iostream>
 #include <list>
-#include<queue>
+#include <queue>
 #include <climits>
 #include <tuple>
 #include <complex>
-#include <iostream>
 #include <vector>
-#include <fstream>
 
+#include <fstream>
+#include <iostream>
 #include<unistd.h> 
 Graph::Graph(int V):V(V), M(0), adj_lst(V), matched(V,-1), bfs_calls(0), dfs_calls(0), bfs_operations(0), dfs_operations(0), aug_paths(0), max_aug_path(0), sum_aug_paths(0) {
 
@@ -115,8 +114,6 @@ bool Graph::findMultipleAugmentingPath(){
     }
     return found_path;
 }
-
-
 
 bool Graph::extractPath(int n, vector<int>& depth, vector<bool>& active, int& path_len) {
     // my original code had some flaw I couldn't fix, I got some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm

@@ -26,11 +26,10 @@ private:
 public:
     Graph(int V);
     void addEdge(int u, int v);
-    list<int> findAugmentingPath();
     bool findMultipleAugmentingPath();
     bool extractPath(int v, vector<int> &depth, vector<bool> &active, int &path_len);
     void maximumMatching();
-    int countMatchings();
+    int  countMatchings();
     void readMatchings();
     void readAugpath(list<int> path);
     ~Graph();

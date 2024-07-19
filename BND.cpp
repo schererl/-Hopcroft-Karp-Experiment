@@ -184,8 +184,9 @@ public:
         int high = allEdges.size();
         int it = 0;
         double B = 0;
-        while (high >= low) {
+        while (high > low) {
             int mid = (high+low)/2;
+            cout << " NEW MID " << mid << endl;
             double b = allEdges[mid]->weight;
             
             cout << "\niteration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
@@ -211,14 +212,15 @@ public:
 
             } else {
                 high = mid-1;
-                cout<< "\tfailed perfect matching: high " << high << " low " << low << endl;
+                cout<< "\tfailed perfect matching" << endl;
             }
             
             cout << '\t';
+            cout<< "\tnew bounds: high " << high << " low " << low << endl;
             readMatchings();
             it+=1;
         }
-
+        cout << "returning bottleneck " << B << endl;
         return B;
     }
     

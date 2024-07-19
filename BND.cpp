@@ -2,70 +2,81 @@
 #include <queue>
 #include <iostream>
 #include <iomanip>
-
+#include <algorithm> 
 class BND{
+struct Edge {
+    int m;
+    int n;
+    double weight;
+};
 private:
     // For the matchings we have V nodes, where [0, V/2) from M group and [V/2, V) from N group
-    vector<list<pair<int, double>>> adj_lst;
+    vector<vector<Edge*>> adj_lst;
+    vector<Edge*> allEdges;
     vector<int> matched;
     vector<int> MATCHED;
-    int M;
-    int V;
-
-    //BKN vars
-    double L = numeric_limits<double>::max();
+    int V; // total vertices
     double H = 0;
-    double h = 0;
 
 public:
-    BND(int V) : V(V), adj_lst(V), matched(V, -1), MATCHED(V, -1) {}
+    BND(int V) : V(V), adj_lst(V), matched(V, -1), MATCHED(V, -1){}
+    ~BND() {
+        for (auto& edgeList : adj_lst) {
+            for (auto* edge : edgeList) {
+                delete edge;
+            }
+        }
+        for (auto* edge : allEdges) {
+            delete edge;
+        }
+    }
+
     // ######################### Hopcroft-Karp stuff ###########################
-    void addEdge(int u, int v, double weight) {
-        if(v < V/2){ // small change to fit the graph
-            v = v+V/2;
+    void addEdge(int m, int n, double weight) {
+        if (n < V / 2) { // Adjust index range
+            n += V / 2;
+        }
+        if (weight > H) {
+            H = weight;
         }
 
-        if(weight < L){
-            L = weight;
-        }
-        if(weight > H){
-            H = weight;
-            h = weight;
-        }
-        adj_lst[u].emplace_back(make_pair(v, weight));
-        adj_lst[v].emplace_back(make_pair(u, weight));
+        Edge* edge = new Edge{m, n, weight};
+        adj_lst[m].push_back(edge);
+        adj_lst[n].push_back(edge);
+        allEdges.push_back(edge);
+        cout << "edge: " << edge->m << " " << edge->n << " w:" << edge->weight << endl;
     }
 
     bool findMultipleAugmentingPaths(const double &bottleneck){
         vector<int>  dist(V+1, 10000000);
         queue<int>   q;
-        for(int n = 0; n < V/2;n++){
-            if(matched[n] == -1){
-                q.push(n);
-                dist[n] = 0;
+        for(int m = 0; m < V/2;m++){
+            if(matched[m] == -1){
+                q.push(m);
+                dist[m] = 0;
             }
         }
         int cutt_off = 10000001;
         while(!q.empty()){
-            int u = q.front();
+            int m = q.front();
             q.pop();
-            if(dist[u] == dist[V] || dist[u] > cutt_off){ 
+            if(dist[m] == dist[V] || dist[m] > cutt_off){ 
                 continue;
             }
             
-            for(auto &v_tuple : adj_lst[u]){
-                int v = v_tuple.first;
-                double w = v_tuple.second;
+            for(auto &edge : adj_lst[m]){
+                int n = edge->n;
+                double w = edge->weight;
                 if(w < bottleneck) continue; // considering bottleneck lowerbound
 
-                if(dist[v] == dist[V]){ // in case matched[v] not visited yet
-                    dist[v] = dist[u]+1;
-                    if(matched[v]==-1){ // found free v, assign the cuttoff
-                        cutt_off = dist[v];
+                if(dist[n] == dist[V]){ // in case matched[n] not visited yet
+                    dist[n] = dist[m]+1;
+                    if(matched[n]==-1){ // found free n, assign the cuttoff
+                        cutt_off = dist[n];
                         continue;
                     }
-                    dist[matched[v]] = dist[u]+2;  //move bach to U with matched v
-                    q.push(matched[v]);
+                    dist[matched[n]] = dist[m]+2;  //move back to M with matched n
+                    q.push(matched[n]);
                 }
             }
         }
@@ -86,25 +97,23 @@ public:
         active[n] = false;
         
         //search for reachable edges to v
-        for(auto &m_tuple:adj_lst[n]){
-            int m   = m_tuple.first;
-            double m_w = m_tuple.second;
-            if(m_w < bottleneck) continue;
+        for(auto &edge:adj_lst[n]){
+            if(edge->weight < bottleneck) continue;
 
             //found a free variable from u, its over
-            if(active[m] && depth[m] == 0){
-                active[m] = false;
-                matched[m] = n;
-                matched[n] = m;
+            if(active[edge->m] && depth[edge->m] == 0){
+                active[edge->m] = false;
+                matched[edge->m] = n;
+                matched[n] = edge->m;
                 path_len+=2;
                 return true;
             }
             // check for active u
-            if(active[m] && depth[n]-1 == depth[m]){
-                active[m] = false;
-                if(extractPath(matched[m], depth, active, path_len, bottleneck)){
-                    matched[m] = n;
-                    matched[n] = m;
+            if(active[edge->m] && depth[n]-1 == depth[edge->m]){
+                active[edge->m] = false;
+                if(extractPath(matched[edge->m], depth, active, path_len, bottleneck)){
+                    matched[edge->m] = n;
+                    matched[n] = edge->m;
                     path_len+=2;
                     return true;
                 }
@@ -126,12 +135,15 @@ public:
 
     // ######################### Birkhoff-von Neumann stuff ##############################
     void BNDecomposition(double precision = 0.0001){
-        while (h > precision) {
+        while (H > precision) {
+            cout << "search for bottleneck " << endl;
             double bottleneck = findBottleneck();
-            cout << "bottleneck: " << bottleneck << endl;
+            cout << "BOTTLENECK: " << bottleneck << endl;
+            cout << "BEFORE discount\t";
             readMatchings();
             if (bottleneck > 0) {
                 decreaseMatchings(bottleneck);
+                cout << "AFTER discount\t";
                 readMatchings();
             }
             // Wait for the user to press enter to continue to the next iteration
@@ -141,15 +153,15 @@ public:
     }
     
     void decreaseMatchings(const double &bottleneck){
-        h = 0;
+        H = 0;
         for (int m = 0; m < V; m++) {
             if (MATCHED[m] == -1) continue;
-            int n = MATCHED[m];
+            int match_n = MATCHED[m];
             for (auto& edge : adj_lst[m]) {
-                if (edge.first == n) {
-                    edge.second -= bottleneck;
-                    if(h < edge.second){ //update new discounted highest value
-                        h = edge.second;
+                if (edge->n == match_n) {
+                    edge->weight -= bottleneck;
+                    if(H < edge->weight){ //update new discounted highest value
+                        H = edge->weight;
                     }
                     break;
                 }
@@ -157,17 +169,29 @@ public:
         }
     }
 
-    double findBottleneck(const double precision = 0.00001){
-        double low = L;
-        double high = H;
+    double findBottleneck(){
+        std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
+        cout << "sorted" << endl;
+        for(auto e : allEdges){ cout << " " << e->weight;}
+        cout << endl;
+        int low = 0;
+        for(auto e : allEdges){ 
+            if(e->weight != 0){
+                break;
+            }
+            low+=1;
+        }
+        int high = allEdges.size();
         int it = 0;
         double B = 0;
-        while (high - low > precision) {
-            double b = (low + high) / 2.0;
-            cout << "\niteration: " << it << " h:" << high << " l:" << low << " b:" << b << endl;
+        while (high >= low) {
+            int mid = (high+low)/2;
+            double b = allEdges[mid]->weight;
+            
+            cout << "\niteration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
             if (perfectMatchingExists(b)) {
                 cout<< "\tfound perfect matching" << endl;
-                low = b;
+                low = mid+1;
                 B = b;
 
                 //reset perfect matchings
@@ -186,8 +210,8 @@ public:
                 }
 
             } else {
-                cout<< "\tfailed perfect matching" << endl;
-                high = b;
+                high = mid-1;
+                cout<< "\tfailed perfect matching: high " << high << " low " << low << endl;
             }
             
             cout << '\t';
@@ -208,17 +232,17 @@ public:
 
     void readMatchings(){
         cout << "matchings are: ";
-        for(int n=0; n < V/2; n++){
-            if(MATCHED[n]!=-1){
+        for(int m=0; m < V/2; m++){
+            if(MATCHED[m]!=-1){
                 //locate weight
                 double w =  -1;
-                for(auto e:adj_lst[n]){
-                    if(e.first == MATCHED[n]){
-                        w = e.second;
+                for(auto e:adj_lst[m]){
+                    if(e->n == MATCHED[m]){
+                        w = e->weight;
                         break;
                     }
                 }
-                cout << "("<< MATCHED[MATCHED[n]] <<","<< MATCHED[n] <<"): " << w << " ";
+                cout << "("<< MATCHED[m] <<","<< MATCHED[MATCHED[m]] <<", " << w << ") ";
                 
             }
         }

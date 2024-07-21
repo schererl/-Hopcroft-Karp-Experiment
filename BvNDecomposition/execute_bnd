@@ -1,0 +1,5 @@
+#!/bin/bash
+
+filename="$1"
+g++ BvND.cpp main.cpp -o run_BvND
+zcat $filename | ./run_BvND

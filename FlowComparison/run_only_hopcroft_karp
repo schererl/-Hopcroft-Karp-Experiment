@@ -1,11 +1,10 @@
 #!/bin/bash
 
-g++ flow-matching-reduction/graph.cpp flow-matching-reduction/main.cpp -o ./bip_flow
 g++ graph.cpp main.cpp -o max_matching
 
 N1=25
 N2=25
-seeds=(1 100 1000)
+seeds=(1 100 1000 2 200 2000 123 1234 12345 123456)
 densities=(0.001 0.002 0.004 0.008 0.016 0.032 0.064 0.128)
 
 for density in "${densities[@]}"; do
@@ -13,7 +12,7 @@ for density in "${densities[@]}"; do
     echo "@"
     echo "@"
     echo "@"
-    echo "Hopcroft-Karp"
+    echo "Algorithm: Hopcroft-Karp"
     echo "Running with seed=$seed"
     echo "Density: $density"
     ulimit -t 60

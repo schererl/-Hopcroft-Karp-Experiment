@@ -1,0 +1,45 @@
+#!/bin/bash
+echo "Compiling graph generator."
+g++ ../Emparelhamento_Maximo/src/rand_bipartite.cpp -o graph_generator
+echo "Compiling reduction to Edmonds-Karp algorithm." 
+g++ ../flow-matching-reduction/graph.cpp ../flow-matching-reduction/main.cpp -o bip_flow
+echo "Compiling Hocroft-Karp algorithm."
+g++ graph.cpp main.cpp -o max_matching
+
+chmod +x graph_generator
+chmod +x bip_flow
+chmod +x max_matching
+
+N1=10000
+N2=10000
+N=$((N1 + N2))
+seeds=(1 100 1000 2 200 2000 123 1234 12345 123456)
+densities=(0.0001 0.0002 0.0004 0.0008 0.0016 0.0032 0.0064 0.0128)
+
+for density in "${densities[@]}"; do
+  for seed in "${seeds[@]}"; do
+    echo "@"
+    echo "@"
+    echo "@"
+    echo "Algorithm: Hopcroft-Karp"
+    echo "Running with seed: $seed"
+    echo "Total Vertices: $N"
+    total_edges=$(echo "$N * $N * $density" | bc)
+    echo "Total Edges: $total_edges"
+    echo "Density: $density"
+    ulimit -t 60
+    ulimit -v 2000000
+    ./graph_generator $N1 $N2 $density $seed | ./max_matching
+
+    echo "@"
+    echo "@"
+    echo "Algorithm: Edmonds-Karp"
+    echo "Running with seed: $seed"
+    echo "Total Vertices: $N"
+    echo "Total Edges: $total_edges"
+    echo "Density: $density"
+    ulimit -t 60
+    ulimit -v 2000000
+    ./graph_generator $N1 $N2 $density $seed | ./bip_flow
+  done
+done

@@ -4,3 +4,6 @@ max_matching
 bip_flow
 .vscode/settings.json
 results/*
+run_BvND
+*.out
+*.csv

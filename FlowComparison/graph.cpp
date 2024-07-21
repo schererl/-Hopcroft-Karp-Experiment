@@ -44,6 +44,7 @@ void Graph::maximumMatching(){
     
     cout << "Algorithm ended after: " << it << " iterations. " << endl;
     cout << "Elapsed time: " <<  elapsed.count() << " seconds. " << endl; 
+    cout << "Total augmentations: " << it << endl;
     cout << "Total matchings: " << countMatchings() << " matchings." << endl;
     cout << "Total augmenting paths: " << sum_aug_paths << endl;
     cout << "Maximum size augmenting path: " << max_aug_path << endl;

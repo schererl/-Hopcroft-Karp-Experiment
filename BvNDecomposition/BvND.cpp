@@ -10,6 +10,7 @@ using namespace std;
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/max_cardinality_matching.hpp>
+#define BOOST_CHECK 0
 class BvND{
 struct Edge {
     int m;
@@ -27,14 +28,13 @@ private:
     // For the matchings we have V nodes, where [0, V/2) from M group and [V/2, V) from N group
     vector<list<Edge*>> adj_lst;
     vector<Edge*> allEdges;
-    vector<int> tmp_matched;
-    vector<int> MATCHED;
+    vector<int> match;
     int V; // total vertices
     double H = 0;
     int L_index = 0;
 
 public:
-    BvND(int V) : V(V), adj_lst(V), tmp_matched(V, -1), MATCHED(V, -1){}
+    BvND(int V) : V(V), adj_lst(V), match(V, -1){}
     ~BvND() {
         for (auto& edgeList : adj_lst) {
             for (auto* edge : edgeList) {
@@ -65,7 +65,7 @@ public:
         vector<int>  dist(V+1, 10000000);
         queue<int>   q;
         for(int m = 0; m < V/2;m++){
-            if(tmp_matched[m] == -1){
+            if(match[m] == -1){
                 q.push(m);
                 dist[m] = 0;
             }
@@ -86,12 +86,12 @@ public:
 
                 if(dist[n] == dist[V]){ // in case matched[n] not visited yet
                     dist[n] = dist[m]+1;
-                    if(tmp_matched[n]==-1){ // found free n, assign the cuttoff
+                    if(match[n]==-1){ // found free n, assign the cuttoff
                         cutt_off = dist[n];
                         continue;
                     }
-                    dist[tmp_matched[n]] = dist[m]+2;  //move back to M with matched n
-                    q.push(tmp_matched[n]);
+                    dist[match[n]] = dist[m]+2;  //move back to M with matched n
+                    q.push(match[n]);
                 }
             }
         }
@@ -99,7 +99,7 @@ public:
         vector<bool> active(V, true);
         bool found_path = false;
         for(int n=V/2; n < V;n++){
-            if(tmp_matched[n]!= -1 || dist[n]==-1) continue;
+            if(match[n]!= -1 || dist[n]==-1) continue;
             int leaf = n;
             int path_len = 0;
             found_path |= extractPath(leaf, dist, active, path_len, bottleneck);
@@ -120,17 +120,17 @@ public:
             //found a free variable from u, its over
             if(depth[edge->m] == 0){
                 active[edge->m] = false;
-                tmp_matched[edge->m] = n;
-                tmp_matched[n] = edge->m;
+                match[edge->m] = n;
+                match[n] = edge->m;
                 path_len+=2;
                 return true;
             }
             // check for active u
             if(depth[n]-1 == depth[edge->m]){
                 active[edge->m] = false;    
-                if(extractPath(tmp_matched[edge->m], depth, active, path_len, bottleneck)){
-                    tmp_matched[edge->m] = n;
-                    tmp_matched[n] = edge->m;
+                if(extractPath(match[edge->m], depth, active, path_len, bottleneck)){
+                    match[edge->m] = n;
+                    match[n] = edge->m;
                     path_len+=2;
                     return true;
                 }
@@ -141,7 +141,7 @@ public:
     
     void maximumMatching(const double &bottleneck){
         int it = 0;
-        fill(tmp_matched.begin(), tmp_matched.end(), -1);
+        fill(match.begin(), match.end(), -1);
         while(true){
             if(!findMultipleAugmentingPaths(bottleneck)){
                 break;
@@ -167,43 +167,26 @@ public:
             }
             std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
             H = allEdges[allEdges.size()-1]->weight;
-            
             //std::this_thread::sleep_for(std::chrono::seconds(1));  // Pause for 1 second
-
         }
     }
 
     void discountFromMatchings(const double &bottleneck){
-        //reset perfect matchings
-        // for(int m = 0; m < V/2;m++){
-        //     if(MATCHED[m] != -1){ 
-        //         MATCHED[MATCHED[m]] = -1;
-        //         MATCHED[m] = -1;
-        //     }
-        // }
         maximumMatching(bottleneck);
-        // update perfect matchings
-        // for(int m = 0; m < V/2;m++){
-        //     if(tmp_matched[m] != -1){
-        //         MATCHED[m] = tmp_matched[m];
-        //         MATCHED[tmp_matched[m]] = m;
-        //     }
-        // }
-        
         //validateMatching(bottleneck); //testing failing point
         
         
         for(int m=0; m < V/2; m++){
             if(adj_lst[m].empty()) continue; // if there are no edges left, skip m.
             
-            if(tmp_matched[m] == -1 || (tmp_matched[tmp_matched[m]] != m)){ //temporary fail exit point
+            if(match[m] == -1 || (match[match[m]] != m)){ //temporary fail exit point
                 cout << "something wrong here." << endl;
                 exit(0);
             }
 
             bool edge_remove = false;
             for(auto m_edge = adj_lst[m].begin(); m_edge != adj_lst[m].end(); m_edge++){
-                if ((*m_edge)->n == tmp_matched[m]) { 
+                if ((*m_edge)->n == match[m]) { 
                     (*m_edge)->weight -= bottleneck;    //discount edge, NOTE: ALSO I CAN MOVE THE NEW WEIGHT TO THE LEFT
                     if ((*m_edge)->weight <= 1.0E-5) { // in case its is lower than our precision, remove it from adj list
                         adj_lst[m].erase(m_edge);
@@ -214,9 +197,9 @@ public:
             }
             
             if(edge_remove){ //also remove from n
-                for(auto n_edge = adj_lst[tmp_matched[m]].begin(); n_edge != adj_lst[tmp_matched[m]].end(); n_edge++){
+                for(auto n_edge = adj_lst[match[m]].begin(); n_edge != adj_lst[match[m]].end(); n_edge++){
                     if ((*n_edge)->m == m){
-                        adj_lst[tmp_matched[m]].erase(n_edge);
+                        adj_lst[match[m]].erase(n_edge);
                         break;
                     }
                 }
@@ -243,31 +226,30 @@ public:
             int mid = (high+low)/2;
             double b = allEdges[mid]->weight;
             cout << "\titeration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
-            //cout << "BEFORE" << endl;
-            //readEdgeValues();
             bool answer = perfectMatchingExists(b);
-            //cout << "AFTER" << endl;
-            //readEdgeValues();
             if (answer) {
+            #if BOOST_CHECK    
                 if(boost_check(b)){
                     cout<< "\tfound perfect matching, boost agree" << endl;
                 }else{
                     cout<< "\tfound perfect matching BOOST DISAGRE!" << endl; //failing point
                     exit(0);
                 }
+            #endif
                 low = mid+1;
                 B = b;
             } else {
+            #if BOOST_CHECK
                 if(!boost_check(b)){
                     cout << "\tdid not found, boost agree." << endl;
                 }else{
                     cout << "did not find BOOST DISAGRE!" << endl; // failing point
                     exit(0);
                 }
+            #endif
                 high = mid-1;
             }
             it+=1;
-            //readTmpMatchings();
         }
         return B;
     }
@@ -275,7 +257,7 @@ public:
     bool perfectMatchingExists(const double &bottleneck) {
         maximumMatching(bottleneck);
         for(int m=0; m < V/2;m++){
-            if (tmp_matched[m] == -1 && !adj_lst[m].empty()) {
+            if (match[m] == -1 && !adj_lst[m].empty()) {
                 return false;
             }
         }
@@ -319,11 +301,11 @@ public:
 
     void validateMatching(const double &bottleneck){
         for(int v; v < V; v++){
-            if(MATCHED[v] == -1){
+            if(match[v] == -1){
                 cout << "not a perfect matching, something wrong" << endl;
                 exit(0);
             }
-            if(MATCHED[MATCHED[v]] != v){
+            if(match[match[v]] != v){
                 cout << "uncorrespondent matchings, something wrong" << endl;
                 exit(0);
             }
@@ -332,9 +314,9 @@ public:
             int n_vertex = -1;
             if(v < V/2){
                 m_vertex = v;
-                n_vertex = MATCHED[v];
+                n_vertex = match[v];
             }else{
-                m_vertex = MATCHED[v];
+                m_vertex = match[v];
                 n_vertex = v;
             }
 
@@ -362,38 +344,19 @@ public:
 
     }
 
-    void readMatchings(){
-        cout << "matchings are: ";
-        for(int m=0; m < V/2; m++){
-            if(MATCHED[m]!=-1){
-                //locate weight
-                double w =  -1;
-                for(auto e:adj_lst[m]){
-                    if(e->n == MATCHED[m]){
-                        w = e->weight;
-                        break;
-                    }
-                }
-                cout << "("<< MATCHED[m] <<","<< MATCHED[MATCHED[m]] <<", " << w << ") ";
-                
-            }
-        }
-        cout << endl;
-    }
-
     void readTmpMatchings(){
         cout << "matchings are: ";
         for(int m=0; m < V/2; m++){
-            if(tmp_matched[m]!=-1){
+            if(match[m]!=-1){
                 //locate weight
                 double w =  -1;
                 for(auto e:adj_lst[m]){
-                    if(e->n == tmp_matched[m]){
+                    if(e->n == match[m]){
                         w = e->weight;
                         break;
                     }
                 }
-                cout << "("<< tmp_matched[tmp_matched[m]] << ","<< tmp_matched[m] <<", " << w << ") ";
+                cout << "("<< match[match[m]] << ","<< match[m] <<", " << w << ") ";
                 
             }
         }
@@ -403,7 +366,7 @@ public:
     int countMatchings(){
         int match_count = 0;
         for(int n=0; n < V/2; n++){
-            if(MATCHED[n]!=-1){
+            if(match[n]!=-1){
                 match_count+=1;
             }
         }
@@ -413,7 +376,7 @@ public:
     int countTmpMatchings(){
         int match_count = 0;
         for(int n=0; n < V/2; n++){
-            if(tmp_matched[n]!=-1){
+            if(match[n]!=-1){
                 match_count+=1;
             }
         }

@@ -2,7 +2,9 @@ from math import sqrt
 import pandas as pd
 import csv
 
-infile = "flowcomparison.out"
+
+file_base_name = "hopcroft_karp_only"
+infile = f"{file_base_name}.out"
 output_data = []
 
 with open(infile, "r") as file:
@@ -33,7 +35,7 @@ with open(infile, "r") as file:
         output_data.append(data)
 
 fields = ["algorithm", "density", "vertices", "edges", "augmentations", "matchings", "operations", "elapsed_time"]
-outfile = "flowcomparison.csv"
+outfile = f"{file_base_name}.csv"
 with open(outfile, "w") as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=fields)
     writer.writeheader()
@@ -43,12 +45,12 @@ with open(outfile, "w") as csv_file:
 df = pd.read_csv(outfile)
 
 # Calculate lower bounds
-df['bound_augmentations'] = df.apply(
-    lambda row: 0.0 if row['algorithm'] == 'Edmonds-Karp' else (sqrt(row['vertices'])), axis=1
-)
-df['bound_operations'] = df.apply(
-    lambda row: 0.0 if row['algorithm'] == 'Edmonds-Karp' else (sqrt(row['vertices'])* (row['vertices']+ row['edges'])), axis=1
-)
+# df['bound_augmentations'] = df.apply(
+#     lambda row: 0.0 if row['algorithm'] == 'Edmonds-Karp' else (sqrt(row['vertices'])), axis=1
+# )
+# df['bound_operations'] = df.apply(
+#     lambda row: 0.0 if row['algorithm'] == 'Edmonds-Karp' else (sqrt(row['vertices'])* (row['vertices']+ row['edges'])), axis=1
+# )
 
 # Group by density and algorithm and calculate the averages
 grouped_df = df.groupby(['algorithm', 'density']).agg({
@@ -57,9 +59,9 @@ grouped_df = df.groupby(['algorithm', 'density']).agg({
     'elapsed_time': 'mean',
     'matchings': 'mean',
     'operations': 'mean',
-    'augmentations': 'mean',
-    'lower_bound_augmentations': 'mean',
-    'lower_bound_operations': 'mean'
+    'augmentations': 'mean'
+    #'lower_bound_augmentations': 'mean',
+    #'lower_bound_operations': 'mean'
 }).reset_index()
 
 # Round the average vertices to integers and limit float precision
@@ -69,10 +71,10 @@ grouped_df['elapsed_time'] = grouped_df['elapsed_time'].round(6)
 grouped_df['matchings'] = grouped_df['matchings'].round(2)
 grouped_df['operations'] = grouped_df['operations'].round(2)
 grouped_df['augmentations'] = grouped_df['augmentations'].round(2)
-grouped_df['lower_bound_augmentations'] = grouped_df['lower_bound_augmentations'].round(2)
-grouped_df['lower_bound_operations'] = grouped_df['lower_bound_operations'].round(2)
+#grouped_df['lower_bound_augmentations'] = grouped_df['lower_bound_augmentations'].round(2)
+#grouped_df['lower_bound_operations'] = grouped_df['lower_bound_operations'].round(2)
 
 # Save the grouped and averaged results to a new CSV file
-grouped_df.to_csv("flowcomparison_averaged.csv", index=False)
+grouped_df.to_csv(f"{file_base_name}_averaged.csv", index=False)
 
 print(grouped_df)

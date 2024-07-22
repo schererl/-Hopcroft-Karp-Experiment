@@ -16,9 +16,16 @@ struct Edge {
     int n;
     double weight;
 };
+
+#include <cmath>
+
+bool isEqual(double a, double b, double epsilon = 1e-5) {
+    return std::fabs(a - b) < epsilon;
+}
+
 private:
     // For the matchings we have V nodes, where [0, V/2) from M group and [V/2, V) from N group
-    vector<vector<Edge*>> adj_lst;
+    vector<list<Edge*>> adj_lst;
     vector<Edge*> allEdges;
     vector<int> tmp_matched;
     vector<int> MATCHED;
@@ -71,9 +78,11 @@ public:
                 continue;
             }
             
-            for(auto &edge : adj_lst[m]){
+            for(const auto &edge : adj_lst[m]){
                 int n = edge->n;
-                if(edge->weight < bottleneck) continue; // considering bottleneck lowerbound
+                
+                //if(edge->weight < bottleneck) continue; // considering bottleneck lowerbound
+                if(!(edge->weight>bottleneck || isEqual(edge->weight,bottleneck))) continue;
 
                 if(dist[n] == dist[V]){ // in case matched[n] not visited yet
                     dist[n] = dist[m]+1;
@@ -103,9 +112,10 @@ public:
         active[n] = false;
         
         //search for reachable edges to v
-        for(auto &edge:adj_lst[n]){
+        for(const auto &edge:adj_lst[n]){
             if(!active[edge->m]) continue;
-            if(edge->weight < bottleneck || !active[edge->m]) continue;
+            //if(edge->weight < bottleneck || !active[edge->m]) continue;
+            if(!(edge->weight>bottleneck || isEqual(edge->weight,bottleneck)) || !active[edge->m]) continue;
 
             //found a free variable from u, its over
             if(depth[edge->m] == 0){
@@ -129,7 +139,7 @@ public:
         return false;
     }
     
-    void maximumMatching(double bottleneck){
+    void maximumMatching(const double &bottleneck){
         int it = 0;
         fill(tmp_matched.begin(), tmp_matched.end(), -1);
         while(true){
@@ -141,7 +151,7 @@ public:
     
 
     // ######################### Birkhoff-von Neumann stuff ##############################
-    void BNDecomposition(double precision = 0.00001){
+    void BNDecomposition(const double precision = 1.0E-5){
         std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
         H = allEdges[allEdges.size()-1]->weight;
         while (H > precision) {
@@ -158,51 +168,55 @@ public:
             std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
             H = allEdges[allEdges.size()-1]->weight;
             
-            std::this_thread::sleep_for(std::chrono::seconds(1));  // Pause for 1 second
+            //std::this_thread::sleep_for(std::chrono::seconds(1));  // Pause for 1 second
 
         }
     }
 
     void discountFromMatchings(const double &bottleneck){
         //reset perfect matchings
-        for(int m = 0; m < V/2;m++){
-            if(MATCHED[m] != -1){ 
-                MATCHED[MATCHED[m]] = -1;
-                MATCHED[m] = -1;
-            }
-        }
+        // for(int m = 0; m < V/2;m++){
+        //     if(MATCHED[m] != -1){ 
+        //         MATCHED[MATCHED[m]] = -1;
+        //         MATCHED[m] = -1;
+        //     }
+        // }
         maximumMatching(bottleneck);
         // update perfect matchings
-        for(int m = 0; m < V/2;m++){
-            if(tmp_matched[m] != -1){
-                MATCHED[m] = tmp_matched[m];
-                MATCHED[tmp_matched[m]] = m;
-            }
-        }
-        validateMatching(bottleneck);
+        // for(int m = 0; m < V/2;m++){
+        //     if(tmp_matched[m] != -1){
+        //         MATCHED[m] = tmp_matched[m];
+        //         MATCHED[tmp_matched[m]] = m;
+        //     }
+        // }
+        
+        //validateMatching(bottleneck); //testing failing point
         
         
         for(int m=0; m < V/2; m++){
-            vector<Edge*> m_edges = adj_lst[m];
-            if(m_edges.empty()) continue; // if there are no edges left, skip m.
+            if(adj_lst[m].empty()) continue; // if there are no edges left, skip m.
             
-            
+            if(tmp_matched[m] == -1 || (tmp_matched[tmp_matched[m]] != m)){ //temporary fail exit point
+                cout << "something wrong here." << endl;
+                exit(0);
+            }
+
             bool edge_remove = false;
-            for(int m_i = 0; m_i < m_edges.size(); m_i++){
-                if (m_edges[m_i]->n == MATCHED[m]) { 
-                    m_edges[m_i]->weight -= bottleneck;    //discount edge
-                    if (m_edges[m_i]->weight <= 0.00001) { // in case its is lower than our precision, remove it from adj list
-                        m_edges.erase(m_edges.begin()+m_i);
+            for(auto m_edge = adj_lst[m].begin(); m_edge != adj_lst[m].end(); m_edge++){
+                if ((*m_edge)->n == tmp_matched[m]) { 
+                    (*m_edge)->weight -= bottleneck;    //discount edge, NOTE: ALSO I CAN MOVE THE NEW WEIGHT TO THE LEFT
+                    if ((*m_edge)->weight <= 1.0E-5) { // in case its is lower than our precision, remove it from adj list
+                        adj_lst[m].erase(m_edge);
                         edge_remove = true;
                         break;
                     }
                 }
             }
+            
             if(edge_remove){ //also remove from n
-                vector<Edge*> n_edges = adj_lst[MATCHED[m]];
-                for(int n_i = 0; n_i < n_edges.size(); n_i++){
-                    if (n_edges[n_i]->m == m){
-                        n_edges.erase(n_edges.begin()+n_i);
+                for(auto n_edge = adj_lst[tmp_matched[m]].begin(); n_edge != adj_lst[tmp_matched[m]].end(); n_edge++){
+                    if ((*n_edge)->m == m){
+                        adj_lst[tmp_matched[m]].erase(n_edge);
                         break;
                     }
                 }
@@ -213,10 +227,12 @@ public:
 
     double findBottleneck(){
         for(int e_i = L_index; e_i < allEdges.size(); e_i++){
-            if(allEdges[e_i]->weight >= 0.00001){
+            if(allEdges[e_i]->weight < 1.0E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
+                L_index+=1;    
+            }else{
                 break;
             }
-            L_index+=1;
+            
         }
         int low = L_index;
         int high = allEdges.size();
@@ -226,27 +242,32 @@ public:
         while (high > low) {
             int mid = (high+low)/2;
             double b = allEdges[mid]->weight;
-            if (perfectMatchingExists(b)) {
-                cout << "\titeration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
+            cout << "\titeration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
+            //cout << "BEFORE" << endl;
+            //readEdgeValues();
+            bool answer = perfectMatchingExists(b);
+            //cout << "AFTER" << endl;
+            //readEdgeValues();
+            if (answer) {
                 if(boost_check(b)){
                     cout<< "\tfound perfect matching, boost agree" << endl;
                 }else{
-                    cout<< "\tfound perfect matching BOOST DISAGRE!" << endl;
+                    cout<< "\tfound perfect matching BOOST DISAGRE!" << endl; //failing point
                     exit(0);
                 }
                 low = mid+1;
                 B = b;
             } else {
                 if(!boost_check(b)){
-                    cout << "\titeration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
                     cout << "\tdid not found, boost agree." << endl;
                 }else{
-                    cout << "did not find BOOST DISAGRE!" << endl;
+                    cout << "did not find BOOST DISAGRE!" << endl; // failing point
                     exit(0);
                 }
                 high = mid-1;
             }
             it+=1;
+            //readTmpMatchings();
         }
         return B;
     }
@@ -263,15 +284,17 @@ public:
     }
 
 // ##################### DEBUG STUFF ###################### //
-    bool boost_check(const double& bottleneck) {
+    bool boost_check(const double bottleneck) {
         using namespace boost;
 
         typedef adjacency_list<vecS, vecS, undirectedS> Graph;
         Graph g;
+        //cout << "boost lib testing with bottleneck " << bottleneck << endl;
         for (auto e : allEdges) {
-            if (e->weight >= bottleneck) {
+            if (e->weight > bottleneck || isEqual(e->weight, bottleneck))
                 boost::add_edge(e->m, e->n, g);
-            }
+            //else cout << "\tedge not included " << e->m << " " << e->n << " " << e->weight << " checking if pass bottleneck " << bottleneck << "<=" << e->weight << "->" << (isEqual(bottleneck, e->weight)) << endl;
+            
         }
 
         std::vector<graph_traits<Graph>::vertex_descriptor> mate(num_vertices(g));
@@ -331,6 +354,14 @@ public:
         }
     }
 
+    void readEdgeValues(){
+        cout << "edge values: " << endl;
+        for (auto e : allEdges) {
+            cout << "\tedge " << e->m << " " << e->n << " " << e->weight << endl;
+        }
+
+    }
+
     void readMatchings(){
         cout << "matchings are: ";
         for(int m=0; m < V/2; m++){
@@ -362,7 +393,7 @@ public:
                         break;
                     }
                 }
-                cout << "("<< tmp_matched[m] <<","<< tmp_matched[tmp_matched[m]] <<", " << w << ") ";
+                cout << "("<< tmp_matched[tmp_matched[m]] << ","<< tmp_matched[m] <<", " << w << ") ";
                 
             }
         }

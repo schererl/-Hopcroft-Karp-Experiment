@@ -71,6 +71,7 @@ Still I could not find out why the decomposition wasn't possible
 
 
 ## LAST-UPDATES
+- **(22.07)** Found a floating-point problem, still some examples are not converging 'bcspwr10.dsm.mtx.gz'.
 - **(21.07)** Continued efforts to solve why BvN decomposition does not converge and stops finding perfect matching; no solution yet.
 - **(21.07)** Added Edmonds-Karp for maximum matching using *Boost* lib as a verifier. It seems to lead to the same answers as the Hopcroft-Karp implementation.
 - **(19.07)** BvN decomposition implementation: not finding perfect matching in the binary search, so it is not converging.

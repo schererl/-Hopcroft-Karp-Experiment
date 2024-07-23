@@ -1,5 +1,24 @@
 #!/bin/bash
 
-filename="$1"
+# Compile the C++ files
 g++ BvND.cpp main.cpp -o run_BvND
-zcat $filename | ./run_BvND
+
+# Process each .dsm file in the specified folder
+for filepath in ../Emparelhamento_Maximo/bm/*.dsm.*; 
+do 
+
+  # Check if there are no .dsm files
+  if [ "$filepath" == "../Emparelhamento_Maximo/bm/*.dsm.*" ]; then
+    echo "No .dsm files found in the specified folder."
+    exit 1
+  fi
+  echo "@@"
+  echo "@@"
+  echo "openning next file:"
+  # Extract the filename from the path
+  filename=$(basename "$filepath" .dsm)
+  ulimit -t 60
+  ulimit -v 2000000
+  # Run the compiled program with the current .dsm file
+  zcat "../Emparelhamento_Maximo/bm/${filename}" | ./run_BvND
+done

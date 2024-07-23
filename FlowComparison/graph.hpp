@@ -20,8 +20,8 @@ private:
     int bfs_operations;
     int dfs_operations;
     int aug_paths;
-    int max_aug_path;
-    int sum_aug_paths;
+    int max_augpath_size;
+    int max_augpath_set;
 
 public:
     Graph(int V);

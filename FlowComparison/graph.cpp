@@ -9,7 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include<unistd.h> 
-Graph::Graph(int V):V(V), M(0), adj_lst(V), matched(V,-1), bfs_calls(0), dfs_calls(0), bfs_operations(0), dfs_operations(0), aug_paths(0), max_aug_path(0), sum_aug_paths(0) {
+Graph::Graph(int V):V(V), M(0), adj_lst(V), matched(V,-1), bfs_calls(0), dfs_calls(0), bfs_operations(0), dfs_operations(0), aug_paths(0), max_augpath_set(0), max_augpath_size(0) {
 
 }
 
@@ -46,8 +46,8 @@ void Graph::maximumMatching(){
     cout << "Elapsed time: " <<  elapsed.count() << " seconds. " << endl; 
     cout << "Total augmentations: " << it << endl;
     cout << "Total matchings: " << countMatchings() << " matchings." << endl;
-    cout << "Total augmenting paths: " << sum_aug_paths << endl;
-    cout << "Maximum size augmenting path: " << max_aug_path << endl;
+    cout << "Maximum size augmenting path: " << max_augpath_size << endl;
+    cout << "Maximum number of augmenting paths: " << max_augpath_set << endl;
     cout << "BFS calls: " << bfs_calls << endl;
     cout << "BFS operations: " << bfs_operations << endl;
     cout << "DFS calls: " << dfs_calls << endl;
@@ -85,6 +85,7 @@ bool Graph::findMultipleAugmentingPath(){
         }
         
         for(int v : adj_lst[u]){
+            bfs_operations+=1;
             if(dist[v] == dist[V]){ // in case matched[v] not visited yet
                 dist[v] = dist[u]+1;
                 if(matched[v]==-1){ // found free v, assign the cuttoff
@@ -99,6 +100,7 @@ bool Graph::findMultipleAugmentingPath(){
 
     vector<bool> active(V, true);
     bool found_path = false;
+    int augpaths_found = 0;
     for(int n=V/2; n < V;n++){
         if(matched[n]!= -1 || dist[n]==-1) continue;
         int leaf = n;
@@ -106,23 +108,24 @@ bool Graph::findMultipleAugmentingPath(){
         int path_len = 0;
         found_path |= extractPath(leaf, dist, active, path_len);
         if(path_len > 0){
-            sum_aug_paths+=1;
-            if(path_len > max_aug_path){
-                max_aug_path=path_len;
+            augpaths_found+=1;
+            if(path_len > max_augpath_size){
+                max_augpath_size=path_len;
             }
         }
-        
     }
+    if(augpaths_found> max_augpath_set){
+        max_augpath_set = augpaths_found;
+    }
+
     return found_path;
 }
 
 bool Graph::extractPath(int n, vector<int>& depth, vector<bool>& active, int& path_len) {
-    // my original code had some flaw I couldn't fix, I got some ideas with https://en.wikipedia.org/wiki/Hopcroft%E2%80%93Karp_algorithm
-    dfs_operations+=1;
     active[n] = false;
-    
     //search for reachable edges to v
     for(int m:adj_lst[n]){
+        dfs_operations+=1;
         //found a free variable from u, its over
         if(active[m] && depth[m] == 0){
             active[m] = false;

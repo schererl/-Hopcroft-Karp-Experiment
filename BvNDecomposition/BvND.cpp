@@ -20,7 +20,7 @@ struct Edge {
 
 #include <cmath>
 
-bool isEqual(double a, double b, double epsilon = 1e-5) {
+bool isEqual(double a, double b, double epsilon = 1.0E-5) {
     return std::fabs(a - b) < epsilon;
 }
 
@@ -48,9 +48,8 @@ public:
 
     // ######################### Hopcroft-Karp stuff ###########################
     void addEdge(int m, int n, double weight) {
-        if (n < V / 2) { // index range
-            n += V / 2;
-        }
+        n += V / 2;
+        
         if (weight > H) {
             H = weight;
         }
@@ -173,8 +172,6 @@ public:
 
     void discountFromMatchings(const double &bottleneck){
         maximumMatching(bottleneck);
-        //validateMatching(bottleneck); //testing failing point
-        
         
         for(int m=0; m < V/2; m++){
             if(adj_lst[m].empty()) continue; // if there are no edges left, skip m.
@@ -188,7 +185,7 @@ public:
             for(auto m_edge = adj_lst[m].begin(); m_edge != adj_lst[m].end(); m_edge++){
                 if ((*m_edge)->n == match[m]) { 
                     (*m_edge)->weight -= bottleneck;    //discount edge, NOTE: ALSO I CAN MOVE THE NEW WEIGHT TO THE LEFT
-                    if ((*m_edge)->weight <= 1.0E-5) { // in case its is lower than our precision, remove it from adj list
+                    if ((*m_edge)->weight < 1.0E-5 || isEqual((*m_edge)->weight, 1.0E-5)) { // in case its is lower than our precision, remove it from adj list
                         adj_lst[m].erase(m_edge);
                         edge_remove = true;
                         break;
@@ -210,7 +207,7 @@ public:
 
     double findBottleneck(){
         for(int e_i = L_index; e_i < allEdges.size(); e_i++){
-            if(allEdges[e_i]->weight < 1.0E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
+            if(allEdges[e_i]->weight < 1E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
                 L_index+=1;    
             }else{
                 break;
@@ -218,6 +215,7 @@ public:
             
         }
         int low = L_index;
+        
         int high = allEdges.size();
         int it   = 0;
         double B = -1;
@@ -236,7 +234,8 @@ public:
                     exit(0);
                 }
             #endif
-                low = mid+1;
+                if(low == mid) return B;
+                low = mid;
                 B = b;
             } else {
             #if BOOST_CHECK
@@ -248,6 +247,7 @@ public:
                 }
             #endif
                 high = mid-1;
+                
             }
             it+=1;
         }
@@ -356,7 +356,7 @@ public:
                         break;
                     }
                 }
-                cout << "("<< match[match[m]] << ","<< match[m] <<", " << w << ") ";
+                cout << "("<< match[match[m]] << ","<< match[m] <<") ";
                 
             }
         }

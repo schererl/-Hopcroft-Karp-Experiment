@@ -1,0 +1,226 @@
+vsputrich@vsputrich-All-Series:~/Desktop/hopcroft-Karp-Experiment/BvNDecomposition$ ./execute_bnd 
+@@
+@@
+openning next file:
+aft02.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 8184 8184 127762
+numRows: 8184, numCols: 8184, numEntries: 127762
+./execute_bnd: line 7: 30392 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30393 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+barth4.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 6019 6019 40965
+numRows: 6019, numCols: 6019, numEntries: 40965
+Iterations: 60
+Elapsed Time: 20.5061
+Alpha Sum: 0.999854
+@@
+@@
+openning next file:
+barth.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 6691 6691 46187
+numRows: 6691, numCols: 6691, numEntries: 46187
+Iterations: 69
+Elapsed Time: 35.111
+Alpha Sum: 0.999854
+@@
+@@
+openning next file:
+bcspwr10.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5300 5300 21842
+numRows: 5300, numCols: 5300, numEntries: 21842
+Iterations: 66
+Elapsed Time: 6.92499
+Alpha Sum: 0.999861
+@@
+@@
+openning next file:
+bcsstk38.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 8032 8032 355460
+numRows: 8032, numCols: 8032, numEntries: 355460
+./execute_bnd: line 7: 30671 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30672 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+benzene.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 8219 8219 242669
+numRows: 8219, numCols: 8219, numEntries: 242669
+./execute_bnd: line 7: 30735 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30736 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+c-29.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5033 5033 43731
+numRows: 5033, numCols: 5033, numEntries: 43731
+./execute_bnd: line 7: 30791 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30792 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+EX5.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 6545 6545 295680
+numRows: 6545, numCols: 6545, numEntries: 295680
+./execute_bnd: line 7: 30892 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30893 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+EX6.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 6545 6545 295680
+numRows: 6545, numCols: 6545, numEntries: 295680
+./execute_bnd: line 7: 30943 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     30944 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+flowmeter0.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9669 9669 67391
+numRows: 9669, numCols: 9669, numEntries: 67391
+Iterations: 57
+Elapsed Time: 46.6592
+Alpha Sum: 0.99987
+@@
+@@
+openning next file:
+fv1.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9604 9604 85264
+numRows: 9604, numCols: 9604, numEntries: 85264
+Iterations: 36
+Elapsed Time: 15.1389
+Alpha Sum: 0.999899
+@@
+@@
+openning next file:
+fv2.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9801 9801 87025
+numRows: 9801, numCols: 9801, numEntries: 87025
+Iterations: 45
+Elapsed Time: 29.2704
+Alpha Sum: 0.999887
+@@
+@@
+openning next file:
+fxm3_6.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5026 5026 94026
+numRows: 5026, numCols: 5026, numEntries: 94026
+./execute_bnd: line 7: 31224 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31225 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+g3rmt3m3.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5357 5357 207695
+numRows: 5357, numCols: 5357, numEntries: 207695
+./execute_bnd: line 7: 31284 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31285 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+Kuu.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 7102 7102 340200
+numRows: 7102, numCols: 7102, numEntries: 340200
+./execute_bnd: line 7: 31338 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31339 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+mplate.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5962 5962 142190
+numRows: 5962, numCols: 5962, numEntries: 142190
+./execute_bnd: line 7: 31403 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31404 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+n3c6-b7.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 6435 6435 25740
+numRows: 6435, numCols: 6435, numEntries: 25740
+Iterations: 0
+Elapsed Time: 0.170158
+Alpha Sum: 0
+@@
+@@
+openning next file:
+nemeth02.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9506 9506 394808
+numRows: 9506, numCols: 9506, numEntries: 394808
+./execute_bnd: line 7: 31468 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31469 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+nemeth03.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9506 9506 394808
+numRows: 9506, numCols: 9506, numEntries: 394808
+./execute_bnd: line 7: 31521 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31522 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+olm5000.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5000 5000 19996
+numRows: 5000, numCols: 5000, numEntries: 19996
+Iterations: 15
+Elapsed Time: 0.555281
+Alpha Sum: 1.00002
+@@
+@@
+openning next file:
+s1rmq4m1.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5489 5489 262411
+numRows: 5489, numCols: 5489, numEntries: 262411
+./execute_bnd: line 7: 31575 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31576 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+s2rmq4m1.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5489 5489 263351
+numRows: 5489, numCols: 5489, numEntries: 263351
+./execute_bnd: line 7: 31644 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31645 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+SiH4.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 5041 5041 171903
+numRows: 5041, numCols: 5041, numEntries: 171903
+./execute_bnd: line 7: 31698 Done                    zcat "../Emparelhamento_Maximo/bm/${filename}"
+     31699 Killed                  | ./run_BvND
+@@
+@@
+openning next file:
+t2d_q4.dsm.mtx.gz
+Running Birkhoff-von Neumann Decomposition...
+Header read: 9801 9801 87025
+numRows: 9801, numCols: 9801, numEntries: 87025
+Iterations: 49
+Elapsed Time: 39.9241
+Alpha Sum: 0.999852

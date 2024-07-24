@@ -11,6 +11,7 @@ using namespace std;
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/max_cardinality_matching.hpp>
 #define BOOST_CHECK 0
+#define VERBOSE 0
 class BvND{
 struct Edge {
     int m;
@@ -30,9 +31,7 @@ private:
     vector<Edge*> allEdges;
     vector<int> match;
     int V; // total vertices
-    double H = 0;
-    int L_index = 0;
-
+    
 public:
     BvND(int V) : V(V), adj_lst(V), match(V, -1){}
     ~BvND() {
@@ -51,10 +50,7 @@ public:
         if (n < V / 2) { // index range
             n += V / 2;
         }
-        if (weight > H) {
-            H = weight;
-        }
-        //weight = round(weight * 10000) / 100000.0;
+        
         Edge* edge = new Edge{m, n, weight};
         adj_lst[m].push_back(edge);
         adj_lst[n].push_back(edge);
@@ -114,7 +110,7 @@ public:
         //search for reachable edges to v
         for(const auto &edge:adj_lst[n]){
             if(!active[edge->m]) continue;
-            //if(edge->weight < bottleneck || !active[edge->m]) continue;
+            
             if(!(edge->weight>bottleneck || isEqual(edge->weight,bottleneck)) || !active[edge->m]) continue;
 
             //found a free variable from u, its over
@@ -152,82 +148,93 @@ public:
 
     // ######################### Birkhoff-von Neumann stuff ##############################
     void BNDecomposition(const double precision = 0.00001){
+        auto start = std::chrono::high_resolution_clock::now();
         std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
-        H = allEdges[allEdges.size()-1]->weight;
-        while (H > precision) {
-            cout << "============NEXT DECOMPOSITION============" << endl;
+        double sum__b = 0;
+        int it = 0;
+        vector<double> bottlenecks;
+        while(1 - sum__b > precision){
+            
             double bottleneck = findBottleneck();
+        #if VERBOSE
+            cout << "============NEXT DECOMPOSITION============" << endl;
             cout << "BOTTLENECK: " << bottleneck << endl;
-            cout << "HIGHEST VALUE: " << H << endl;
+            cout << "DENSITY: " << sum__b << endl;
+        #endif
             if (bottleneck != -1) {
                 discountFromMatchings(bottleneck);
-            }else{
-                cout << "bottleneck reached 0 without converging" << endl;
-                exit(0);
+                bottlenecks.push_back(bottleneck);
+            } else {
+                break;
             }
+            it += 1;
+            sum__b += bottleneck;
             std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
-            H = allEdges[allEdges.size()-1]->weight;
-            //std::this_thread::sleep_for(std::chrono::seconds(1));  // Pause for 1 second
         }
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = end - start;
+
+        cout << "Iterations: " << it  << endl;
+        cout << "Elapsed Time: " << duration.count() << endl;
+        cout << "Alpha Sum: " << sum__b << endl;
+        #if VERBOSE
+            cout << "Bottlenecks found: ";
+            for (const auto& b : bottlenecks) {
+                cout << b << " ";
+            }
+        #endif
+        
     }
 
     void discountFromMatchings(const double &bottleneck){
         maximumMatching(bottleneck);
-        //validateMatching(bottleneck); //testing failing point
-        
         
         for(int m=0; m < V/2; m++){
             if(adj_lst[m].empty()) continue; // if there are no edges left, skip m.
-            
-            if(match[m] == -1 || (match[match[m]] != m)){ //temporary fail exit point
-                cout << "something wrong here." << endl;
-                exit(0);
-            }
-
             bool edge_remove = false;
             for(auto m_edge = adj_lst[m].begin(); m_edge != adj_lst[m].end(); m_edge++){
                 if ((*m_edge)->n == match[m]) { 
-                    (*m_edge)->weight -= bottleneck;    //discount edge, NOTE: ALSO I CAN MOVE THE NEW WEIGHT TO THE LEFT
-                    if ((*m_edge)->weight < 0.00001 || isEqual((*m_edge)->weight, 0.00001)) { // in case its is lower than our precision, remove it from adj list
-                        adj_lst[m].erase(m_edge);
+                    (*m_edge)->weight -= bottleneck; 
+                    
+                    // remove edge if weight is below precision
+                    if ((*m_edge)->weight < 0.00001 || isEqual((*m_edge)->weight, 0.00001)) {
+                        m_edge = adj_lst[m].erase(m_edge);
                         edge_remove = true;
-                        break;
-                    }
+                    } 
+                    break;
                 }
             }
             
-            if(edge_remove){ //also remove from n
+            if(edge_remove){
                 for(auto n_edge = adj_lst[match[m]].begin(); n_edge != adj_lst[match[m]].end(); n_edge++){
                     if ((*n_edge)->m == m){
-                        adj_lst[match[m]].erase(n_edge);
+                        if (edge_remove) {
+                            adj_lst[match[m]].erase(n_edge);
+                        }
                         break;
                     }
                 }
             }
         }
-        
     }
-
+        
+    
     double findBottleneck(){
-        // for(int e_i = L_index; e_i < allEdges.size(); e_i++){
-        //     if(allEdges[e_i]->weight < 1.0E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
-        //         L_index+=1;    
-        //     }else{
-        //         break;
-        //     }
-            
-        // }
-        int low = 0;//L_index;
+        int low = 0;
         int high = allEdges.size();
         int it   = 0;
         double B = -1;
+    #if VERBOSE
         cout << "BINARY SEARCH: high " << high << " low " << low << endl;
-        while (high > low) {
+    #endif
+        while (high > low+1) {
             int mid = (high+low)/2;
             double b = allEdges[mid]->weight;
+        #if VERBOSE
             cout << "\titeration " << it << " => h:" << high << " l:" << low << " m:" << mid << " bottleneck: " << b << endl;
-            bool answer = perfectMatchingExists(b);
-            if (answer) {
+        #endif
+            
+            if (perfectMatchingExists(b)) {
             #if BOOST_CHECK    
                 if(boost_check(b)){
                     cout<< "\tfound perfect matching, boost agree" << endl;
@@ -236,7 +243,7 @@ public:
                     exit(0);
                 }
             #endif
-                low = mid+1;
+                low = mid;
                 B = b;
             } else {
             #if BOOST_CHECK

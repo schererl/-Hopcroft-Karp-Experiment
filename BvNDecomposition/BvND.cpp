@@ -20,7 +20,7 @@ struct Edge {
 
 #include <cmath>
 
-bool isEqual(double a, double b, double epsilon = 1.0E-5) {
+bool isEqual(double a, double b, double epsilon = 0.00001) {
     return std::fabs(a - b) < epsilon;
 }
 
@@ -48,12 +48,13 @@ public:
 
     // ######################### Hopcroft-Karp stuff ###########################
     void addEdge(int m, int n, double weight) {
-        n += V / 2;
-        
+        if (n < V / 2) { // index range
+            n += V / 2;
+        }
         if (weight > H) {
             H = weight;
         }
-
+        //weight = round(weight * 10000) / 100000.0;
         Edge* edge = new Edge{m, n, weight};
         adj_lst[m].push_back(edge);
         adj_lst[n].push_back(edge);
@@ -150,7 +151,7 @@ public:
     
 
     // ######################### Birkhoff-von Neumann stuff ##############################
-    void BNDecomposition(const double precision = 1.0E-5){
+    void BNDecomposition(const double precision = 0.00001){
         std::sort(allEdges.begin(), allEdges.end(), [](const Edge* a, const Edge* b) { return a->weight < b->weight;});
         H = allEdges[allEdges.size()-1]->weight;
         while (H > precision) {
@@ -172,6 +173,8 @@ public:
 
     void discountFromMatchings(const double &bottleneck){
         maximumMatching(bottleneck);
+        //validateMatching(bottleneck); //testing failing point
+        
         
         for(int m=0; m < V/2; m++){
             if(adj_lst[m].empty()) continue; // if there are no edges left, skip m.
@@ -185,7 +188,7 @@ public:
             for(auto m_edge = adj_lst[m].begin(); m_edge != adj_lst[m].end(); m_edge++){
                 if ((*m_edge)->n == match[m]) { 
                     (*m_edge)->weight -= bottleneck;    //discount edge, NOTE: ALSO I CAN MOVE THE NEW WEIGHT TO THE LEFT
-                    if ((*m_edge)->weight < 1.0E-5 || isEqual((*m_edge)->weight, 1.0E-5)) { // in case its is lower than our precision, remove it from adj list
+                    if ((*m_edge)->weight < 0.00001 || isEqual((*m_edge)->weight, 0.00001)) { // in case its is lower than our precision, remove it from adj list
                         adj_lst[m].erase(m_edge);
                         edge_remove = true;
                         break;
@@ -206,16 +209,15 @@ public:
     }
 
     double findBottleneck(){
-        for(int e_i = L_index; e_i < allEdges.size(); e_i++){
-            if(allEdges[e_i]->weight < 1E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
-                L_index+=1;    
-            }else{
-                break;
-            }
+        // for(int e_i = L_index; e_i < allEdges.size(); e_i++){
+        //     if(allEdges[e_i]->weight < 1.0E-5 || isEqual(allEdges[e_i]->weight, 1.0E-5)){
+        //         L_index+=1;    
+        //     }else{
+        //         break;
+        //     }
             
-        }
-        int low = L_index;
-        
+        // }
+        int low = 0;//L_index;
         int high = allEdges.size();
         int it   = 0;
         double B = -1;
@@ -234,8 +236,7 @@ public:
                     exit(0);
                 }
             #endif
-                if(low == mid) return B;
-                low = mid;
+                low = mid+1;
                 B = b;
             } else {
             #if BOOST_CHECK
@@ -247,7 +248,6 @@ public:
                 }
             #endif
                 high = mid-1;
-                
             }
             it+=1;
         }
@@ -356,7 +356,7 @@ public:
                         break;
                     }
                 }
-                cout << "("<< match[match[m]] << ","<< match[m] <<") ";
+                cout << "("<< match[match[m]] << ","<< match[m] <<", " << w << ") ";
                 
             }
         }
